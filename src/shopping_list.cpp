@@ -317,6 +317,8 @@ int64_t getShoppingListItemTotalPrice(const ShoppingListItem &shoppingListItem) 
     return priceCents;
 }
 
+#include <iostream>
+
 /**
  * @brief Parse a shopping list item string.
  * 
@@ -331,7 +333,7 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
     bool hasPerUnitCountType = true;
     
     // Remove the period if it exists.
-    if (endsWith(sView, ".")) {
+    if (endsWithChar(sView, '.')) {
         sView = std::string_view(sView.data(), sView.length() - 1);
     }
     
@@ -359,10 +361,8 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
         perUnitCountType = CountType::Quantity;
     }
     
-    // Space is optional.
-    if (endsWith(sView, " ")) {
-        sView = std::string_view(sView.data(), sView.length() - 1);
-    }
+    // Trim whitespaces from the back.
+    trimFromBack(sView);
     
     int64_t perUnitCount = 1;
     
@@ -371,14 +371,19 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
         
         if (perUnitCountOpt.has_value()) {
             perUnitCount = std::move(*perUnitCountOpt);
+            // Trim whitespaces from the back.
+            trimFromBack(sView);
         }
         
         // We expect a slash before the price if there is a count type per unit.
-        if (endsWith(sView, "/")) {
+        if (endsWithChar(sView, '/')) {
             sView = std::string_view(sView.data(), sView.length() - 1);
         } else {
             throw std::runtime_error("Expected slash before price");
         }
+        
+        // Trim whitespaces from the back.
+        trimFromBack(sView);
     }
     
     size_t dollars;
@@ -388,21 +393,29 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
     
     // Extract the price string.
     std::tie(dollars, cents, _precision) = detectDecimalFromBack(sView);
+    // Trim whitespaces from the back.
+    trimFromBack(sView);
     
     // Combine the dollars and cents to get the price.
     int64_t priceCentsPerUnit = (dollars * 100) + cents;
     
-    if (endsWith(sView, "$")) {
+    if (endsWithChar(sView, '$')) {
         sView = std::string_view(sView.data(), sView.length() - 1);
     } else {
         throw std::runtime_error("Expected dollar sign before price");
     }
     
+    // Trim whitespaces from the back.
+    trimFromBack(sView);
+    
     // Look for a slash ahead of the price, this means it's a quantity e.g. 5/$1.00
-    if (!hasPerUnitCountType && endsWith(sView, "/")) {
+    if (!hasPerUnitCountType && endsWithChar(sView, '/')) {
         sView = std::string_view(sView.data(), sView.length() - 1);
-        
+        // Trim whitespaces from the back.
+        trimFromBack(sView);
         std::optional<int64_t> perUnitCountOpt = tryExtractIntFromBack(sView);
+        // Trim whitespaces from the back.
+        trimFromBack(sView);
         
         if (perUnitCountOpt.has_value()) {
             perUnitCount = std::move(*perUnitCountOpt);
@@ -411,14 +424,15 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
         } else {
             throw std::runtime_error("Expected unit count before price");
         }
+    
+        // Trim whitespaces from the back.
+        trimFromBack(sView);
     }
     
-    // Space is optional.
-    if (endsWith(sView, " ")) {
-        sView = std::string_view(sView.data(), sView.length() - 1);
-    }
+    // Trim whitespaces from the back.
+    trimFromBack(sView);
     
-    if (endsWith(sView, ",")) {
+    if (endsWithChar(sView, ',')) {
         sView = std::string_view(sView.data(), sView.length() - 1);
     } else {
         throw std::runtime_error("Expected comma before price");
@@ -441,10 +455,8 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
         count = detectDoubleFromFront(sView);
     }
     
-    // Look for a space after the count.
-    if (startsWith(sView, " ")) {
-        sView = std::string_view(sView.data() + 1, sView.length() - 1);
-    }
+    // Trim whitespaces from the front.
+    trimFromFront(sView);
     
     CountType countType;
     
@@ -473,14 +485,12 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
     // Not necessary to check if this is a count.
     if (countType != CountType::Quantity) {
         // Period usually occurs after the unit of measurement and is optional.
-        if (startsWith(sView, ".")) {
+        if (startsWithChar(sView, '.')) {
             sView = std::string_view(sView.data() + 1, sView.length() - 1);
         }
         
-        // Check if there is a space after the unit of measurement.
-        if (startsWith(sView, " ")) {
-            sView = std::string_view(sView.data() + 1, sView.length() - 1);
-        } else {
+        // Check if there is space after the unit of measurement.
+        if (!trimFromFront(sView)) {
             throw std::runtime_error("Expected space after the unit of measurement");
         }
     }
