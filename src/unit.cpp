@@ -148,7 +148,7 @@ std::optional<Unit> convertStringToUnit(const std::string_view& s) {
 /**
  * @brief Converts ounces to pounds.
  * 
- * @param ounces 
+ * @param ounces The weight in ounces.
  * @return The equivalent weight in pounds.
  */
 double ouncesToPounds(double ounces) {
@@ -158,7 +158,7 @@ double ouncesToPounds(double ounces) {
 /**
  * @brief Converts pounds to kilograms.
  * 
- * @param pounds 
+ * @param pounds The weight in pounds.
  * @return The equivalent weight in kilograms.
  */
 double poundsToKilograms(double pounds) {
@@ -168,7 +168,7 @@ double poundsToKilograms(double pounds) {
 /**
  * @brief Converts kilograms to pounds.
  * 
- * @param kilograms 
+ * @param kilograms The weight in kilograms.
  * @return The equivalent weight in pounds.
  */
 double kilogramsToPounds(double kilograms) {

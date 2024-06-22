@@ -21,6 +21,7 @@
  * 
  * @param weight The weight.
  * @param unit The unit of measurement.
+ * @return The displayable weight.
  */
 double displayWeight(double weight, Unit unit) {
     if (isWhole(weight)) {
@@ -62,7 +63,7 @@ struct ConvertedPerUnit {
  * @param unit The unit.
  * @param priceCentsPerUnit The price of the item in cents, per unit. 
  * @param preferredUnit The preferred unit.
- * @return ConvertedPerUnit 
+ * @return The converted per unit. 
  */
 ConvertedPerUnit calculateConvertedPerUnit(int64_t perUnitCount, Unit unit, int64_t priceCentsPerUnit, Unit preferredUnit) {
     System system = getUnitSystem(unit);
