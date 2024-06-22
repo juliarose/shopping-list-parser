@@ -74,6 +74,7 @@ Unit pickUnit(const std::string &unitStr) {
  * @brief Reads a shopping list from a file.
  * 
  * @param filePath The path to the shopping list file.
+ * @return The shopping list items.
  */
 std::vector<ShoppingListItem> readShoppingListFromFile(std::string &filePath) {
     std::ifstream file(filePath);

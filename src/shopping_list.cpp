@@ -22,7 +22,7 @@
  * 
  * Advances the string view to exclude the number.
  * 
- * @param sView 
+ * @param sView The string view to check.
  * @return The number.
  */
 double detectDoubleFromFront(std::string_view &sView) {
@@ -88,7 +88,7 @@ double detectDoubleFromFront(std::string_view &sView) {
  * 
  * Advances the string view to exclude the number.
  * 
- * @param sView 
+ * @param sView The string view to check.
  * @return A tuple containing the whole number and the fractional number, and the precision of the 
  * fractional number.
  */
@@ -176,6 +176,12 @@ std::tuple<size_t, size_t, size_t> detectDecimalFromBack(std::string_view &sView
     return std::make_tuple(whole, fractional, precision);
 }
 
+/**
+ * @brief Detects an integer from the back of the string.
+ * 
+ * @param sView The string view to check.
+ * @return The integer.
+ */
 size_t detectIntFromBack(const std::string_view &sView) {
     size_t intLen = 0;
     
@@ -208,7 +214,7 @@ size_t detectIntFromBack(const std::string_view &sView) {
  * 
  * Advances the string view to exclude the number.
  * 
- * @param sView 
+ * @param sView The string view to check.
  * @return An optional containing the integer if it exists.
  */
 std::optional<int64_t> tryExtractIntFromBack(std::string_view &sView) {
@@ -261,7 +267,7 @@ std::optional<int64_t> tryExtractIntFromBack(std::string_view &sView) {
 /**
  * @brief Get the total price of a shopping list item.
  * 
- * @param shoppingListItem 
+ * @param shoppingListItem The shopping list item.
  * @return The total price of the shopping list item in cents.
  */
 int64_t getShoppingListItemTotalPrice(const ShoppingListItem &shoppingListItem) {
@@ -314,7 +320,7 @@ int64_t getShoppingListItemTotalPrice(const ShoppingListItem &shoppingListItem) 
 /**
  * @brief Parse a shopping list item string.
  * 
- * @param s 
+ * @param s The shopping list item string.
  * @return The shopping list item.
  */
 ShoppingListItem parseShoppingListItemStr(const std::string &s) {
