@@ -48,7 +48,7 @@ double displayWeight(double weight, Unit unit) {
 /// Converted price per unit result.
 struct ConvertedPerUnit {
     // The count of the unit.
-    double unitCount;
+    double perUnitCount;
     /// The unit for the price per unit.
     Unit perUnitUnit;
     /// The price of the item in cents, per unit.
@@ -58,21 +58,21 @@ struct ConvertedPerUnit {
 /**
  * @brief Calculate the conversion for the per unit.
  * 
- * @param unitCount The count of the unit.
+ * @param perUnitCount The count of the unit.
  * @param unit The unit.
  * @param priceCentsPerUnit The price of the item in cents, per unit. 
  * @param preferredUnit The preferred unit.
  * @return ConvertedPerUnit 
  */
-ConvertedPerUnit calculateConvertedPerUnit(int64_t unitCount, Unit unit, int64_t priceCentsPerUnit, Unit preferredUnit) {
+ConvertedPerUnit calculateConvertedPerUnit(int64_t perUnitCount, Unit unit, int64_t priceCentsPerUnit, Unit preferredUnit) {
     System system = getUnitSystem(unit);
     System preferredSystem = getUnitSystem(preferredUnit);
-    double preferredUnitCount = static_cast<double>(unitCount);
+    double preferredPerUnitCount = static_cast<double>(perUnitCount);
     
     if (system == preferredSystem) {
         // The unit is in the same system as the preferred unit.
         return ConvertedPerUnit {
-            .unitCount = preferredUnitCount,
+            .perUnitCount = preferredPerUnitCount,
             .perUnitUnit = unit,
             .priceCentsPerUnit = priceCentsPerUnit,
         };
@@ -89,21 +89,21 @@ ConvertedPerUnit calculateConvertedPerUnit(int64_t unitCount, Unit unit, int64_t
             break;
     }
     
-    double convertedUnitCount = convertWeight(static_cast<double>(unitCount), unit, preferredUnit);
+    double convertedUnitCount = convertWeight(static_cast<double>(perUnitCount), unit, preferredUnit);
     int64_t newPriceCentsPerUnit = priceCentsPerUnit;
     
-    if (unitCount > 1) {
+    if (perUnitCount > 1) {
         // We don't adjust the price but we do adjust the unit count.
-        preferredUnitCount = convertedUnitCount;
+        preferredPerUnitCount = convertedUnitCount;
     } else {
         // Get the ratio between the new unit count and the original unit count.
-        double unitCountRatio = preferredUnitCount / static_cast<double>(convertedUnitCount);
+        double perUnitCountRatio = preferredPerUnitCount / static_cast<double>(convertedUnitCount);
         // Calculate the new price per unit.
-        newPriceCentsPerUnit = static_cast<int64_t>(priceCentsPerUnit * unitCountRatio);
+        newPriceCentsPerUnit = static_cast<int64_t>(priceCentsPerUnit * perUnitCountRatio);
     }
     
     return ConvertedPerUnit {
-        .unitCount = preferredUnitCount,
+        .perUnitCount = preferredPerUnitCount,
         .perUnitUnit = preferredUnit,
         .priceCentsPerUnit = newPriceCentsPerUnit,
     };
@@ -161,12 +161,12 @@ void printShoppingListItem(ShoppingListItem shoppingListItem, Unit preferredUnit
     const char separator = ' ';
     
     std::optional<Unit> unitOpt = convertCountTypeToUnit(shoppingListItem.countType);
-    std::optional<Unit> perUnitUnitOpt = convertCountTypeToUnit(shoppingListItem.countTypePerUnit);
+    std::optional<Unit> perUnitUnitOpt = convertCountTypeToUnit(shoppingListItem.perUnitCountType);
     
     int64_t itemTotalPriceCents = getShoppingListItemTotalPrice(shoppingListItem);
     int64_t priceCentsPerUnit = shoppingListItem.priceCentsPerUnit;
-    int64_t unitCount = shoppingListItem.unitCount;
-    CountType countTypePerUnit = shoppingListItem.countTypePerUnit;
+    int64_t perUnitCount = shoppingListItem.perUnitCount;
+    CountType perUnitCountType = shoppingListItem.perUnitCountType;
     
     printElement(shoppingListItem.name, 20, separator);
     
@@ -194,39 +194,39 @@ void printShoppingListItem(ShoppingListItem shoppingListItem, Unit preferredUnit
     if (perUnitUnitOpt.has_value()) {
         Unit perUnitUnit = std::move(*perUnitUnitOpt);
         ConvertedPerUnit convertedPerUnit = calculateConvertedPerUnit(
-            unitCount,
+            perUnitCount,
             perUnitUnit,
             priceCentsPerUnit,
             preferredUnit
         );
         
-        countTypePerUnit = convertUnitToCountType(convertedPerUnit.perUnitUnit);
+        perUnitCountType = convertUnitToCountType(convertedPerUnit.perUnitUnit);
         priceCentsPerUnit = convertedPerUnit.priceCentsPerUnit;
-        double unitCountDouble = convertedPerUnit.unitCount;
+        double perUnitCountDouble = convertedPerUnit.perUnitCount;
         
         ssPerUnitColumn << "@ $" << std::put_money(priceCentsPerUnit);
         ssPerUnitColumn << " / ";
         
-        if (isWhole(unitCountDouble)) {
-            if (unitCountDouble > 1) {
-                ssPerUnitColumn << static_cast<int64_t>(unitCountDouble) << " ";
+        if (isWhole(perUnitCountDouble)) {
+            if (perUnitCountDouble > 1) {
+                ssPerUnitColumn << static_cast<int64_t>(perUnitCountDouble) << " ";
             }
         } else {
-            ssPerUnitColumn << toPrecision(unitCountDouble, 2) << " ";
+            ssPerUnitColumn << toPrecision(perUnitCountDouble, 2) << " ";
         }
         
-        ssPerUnitColumn << convertCountTypeToString(countTypePerUnit);
+        ssPerUnitColumn << convertCountTypeToString(perUnitCountType);
         ssPerUnitColumn << ".";
     } else {
         // This is a quantity
-        if (unitCount != 1) {
-            ssPerUnitColumn << "@ " << unitCount;
+        if (perUnitCount != 1) {
+            ssPerUnitColumn << "@ " << perUnitCount;
             ssPerUnitColumn << " / ";
             ssPerUnitColumn << "$" << std::put_money(priceCentsPerUnit);
         } else {
             ssPerUnitColumn << "@ $" << std::put_money(priceCentsPerUnit);
             ssPerUnitColumn << " / ";
-            ssPerUnitColumn << convertCountTypeToString(countTypePerUnit);
+            ssPerUnitColumn << convertCountTypeToString(perUnitCountType);
             ssPerUnitColumn << ".";
         }
     }

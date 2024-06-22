@@ -1,5 +1,5 @@
 /**
- * @file shopping_list.cpp  
+ * @file shopping_list.h
  * @author Julia
  * @brief Contains functions for parsing shopping list items.
  * @version 0.1
@@ -28,12 +28,12 @@ struct ShoppingListItem {
     int64_t priceCentsPerUnit;
     /// The count of the item.
     double count;
-    // The count of the unit.
-    int64_t unitCount;
     /// The type of count for the item.
     CountType countType;
+    // The count of the per unit.
+    int64_t perUnitCount;
     /// The type of count for the price per unit.
-    CountType countTypePerUnit;
+    CountType perUnitCountType;
 };
 
 ShoppingListItem parseShoppingListItemStr(const std::string &s);

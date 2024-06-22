@@ -266,17 +266,17 @@ std::optional<int64_t> tryExtractIntFromBack(std::string_view &sView) {
  */
 int64_t getShoppingListItemTotalPrice(const ShoppingListItem &shoppingListItem) {
     int64_t priceCents = shoppingListItem.priceCentsPerUnit;
-    int64_t unitCount = shoppingListItem.unitCount;
+    int64_t perUnitCount = shoppingListItem.perUnitCount;
     int64_t count = shoppingListItem.count;
     
     // If the item is measured by quantity, multiply the price by the quantity.
     if (
-        shoppingListItem.countTypePerUnit == CountType::Quantity ||
+        shoppingListItem.perUnitCountType == CountType::Quantity ||
         shoppingListItem.countType == CountType::Quantity
     ) {
         // Do not do any arithmetic on the unit count type is not a quantity.
-        if (shoppingListItem.countTypePerUnit == CountType::Quantity && unitCount != 1) {
-            double ratio = static_cast<double>(count) / static_cast<double>(unitCount);
+        if (shoppingListItem.perUnitCountType == CountType::Quantity && perUnitCount != 1) {
+            double ratio = static_cast<double>(count) / static_cast<double>(perUnitCount);
             priceCents *= ratio;
         } else {
             priceCents *= count;
@@ -288,7 +288,7 @@ int64_t getShoppingListItemTotalPrice(const ShoppingListItem &shoppingListItem) 
     // Get the unit for the item.
     std::optional<Unit> unitOpt = convertCountTypeToUnit(shoppingListItem.countType).value();
     // Get the unit for the price per unit.
-    std::optional<Unit> perUnitUnitOpt = convertCountTypeToUnit(shoppingListItem.countTypePerUnit);
+    std::optional<Unit> perUnitUnitOpt = convertCountTypeToUnit(shoppingListItem.perUnitCountType);
     
     if (!unitOpt.has_value()) {
         // This should never happen.
@@ -303,7 +303,7 @@ int64_t getShoppingListItemTotalPrice(const ShoppingListItem &shoppingListItem) 
     // Convert the weight to the same unit that the price is in.
     double weight = convertWeight(shoppingListItem.count, *unitOpt, *perUnitUnitOpt);
     // Convert the per unit weight to the preferred unit.
-    double perUnitWeight = shoppingListItem.unitCount;
+    double perUnitWeight = shoppingListItem.perUnitCount;
     
     // If the item is measured by weight, multiply the price by the weight.
     priceCents *= (weight / perUnitWeight);
@@ -321,8 +321,8 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
     std::string_view sView = std::string_view(s.data(), s.length());
     
     // Get the unit count type.
-    CountType countTypePerUnit;
-    bool hasCountTypePerUnit = true;
+    CountType perUnitCountType;
+    bool hasPerUnitCountType = true;
     
     // Remove the period if it exists.
     if (endsWith(sView, ".")) {
@@ -331,26 +331,26 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
     
     if (endsWith(sView, "lbs")) {
         sView = std::string_view(sView.data(), sView.length() - 3);
-        countTypePerUnit = CountType::Pound;
+        perUnitCountType = CountType::Pound;
     } else if (endsWith(sView, "lb")) {
         sView = std::string_view(sView.data(), sView.length() - 2);
-        countTypePerUnit = CountType::Pound;
+        perUnitCountType = CountType::Pound;
     } else if (endsWith(sView, "oz")) {
         sView = std::string_view(sView.data(), sView.length() - 2);
-        countTypePerUnit = CountType::Ounce;
+        perUnitCountType = CountType::Ounce;
     } else if (endsWith(sView, "g")) {
         sView = std::string_view(sView.data(), sView.length() - 1);
-        countTypePerUnit = CountType::Gram;
+        perUnitCountType = CountType::Gram;
     } else if (endsWith(sView, "kg")) {
         sView = std::string_view(sView.data(), sView.length() - 2);
-        countTypePerUnit = CountType::Kilogram;
+        perUnitCountType = CountType::Kilogram;
     }  else if (endsWith(sView, "ea")) {
         sView = std::string_view(sView.data(), sView.length() - 2);
-        countTypePerUnit = CountType::Quantity;
+        perUnitCountType = CountType::Quantity;
     } else {
-        hasCountTypePerUnit = false;
+        hasPerUnitCountType = false;
         // Assume it's a quantity.
-        countTypePerUnit = CountType::Quantity;
+        perUnitCountType = CountType::Quantity;
     }
     
     // Space is optional.
@@ -358,13 +358,13 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
         sView = std::string_view(sView.data(), sView.length() - 1);
     }
     
-    int64_t unitCount = 1;
+    int64_t perUnitCount = 1;
     
-    if (hasCountTypePerUnit) {
-        std::optional<int64_t> unitCountOpt = tryExtractIntFromBack(sView);
+    if (hasPerUnitCountType) {
+        std::optional<int64_t> perUnitCountOpt = tryExtractIntFromBack(sView);
         
-        if (unitCountOpt.has_value()) {
-            unitCount = std::move(*unitCountOpt);
+        if (perUnitCountOpt.has_value()) {
+            perUnitCount = std::move(*perUnitCountOpt);
         }
         
         // We expect a slash before the price if there is a count type per unit.
@@ -393,15 +393,15 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
     }
     
     // Look for a slash ahead of the price, this means it's a quantity e.g. 5/$1.00
-    if (!hasCountTypePerUnit && endsWith(sView, "/")) {
+    if (!hasPerUnitCountType && endsWith(sView, "/")) {
         sView = std::string_view(sView.data(), sView.length() - 1);
         
-        std::optional<int64_t> unitCountOpt = tryExtractIntFromBack(sView);
+        std::optional<int64_t> perUnitCountOpt = tryExtractIntFromBack(sView);
         
-        if (unitCountOpt.has_value()) {
-            unitCount = std::move(*unitCountOpt);
+        if (perUnitCountOpt.has_value()) {
+            perUnitCount = std::move(*perUnitCountOpt);
             // Make sure this is quantity.
-            countTypePerUnit = CountType::Quantity;
+            perUnitCountType = CountType::Quantity;
         } else {
             throw std::runtime_error("Expected unit count before price");
         }
@@ -419,8 +419,8 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
     }
     
     // Expects a quantity at the front.
-    bool expectsQuantity = countTypePerUnit == CountType::Quantity ||
-        unitCount != 1;
+    bool expectsQuantity = perUnitCountType == CountType::Quantity ||
+        perUnitCount != 1;
     double count;
     
     // Take the count value.
@@ -485,8 +485,8 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
         .name = name,
         .priceCentsPerUnit = priceCentsPerUnit,
         .count = count,
-        .unitCount = unitCount,
         .countType = countType,
-        .countTypePerUnit = countTypePerUnit,
+        .perUnitCount = perUnitCount,
+        .perUnitCountType = perUnitCountType,
     };
 }
