@@ -15,7 +15,7 @@ Create a `bin` directory for the compiled binary.
 mkdir -p bin
 ```
 
-### Compilation with g++
+### Compile with g++
 
 ```bash
 g++ -std=c++17 -O2 -g ./src/main.cpp ./src/unit.cpp ./src/utils.cpp ./src/shopping_list.cpp ./src/display.cpp -o bin/main
@@ -23,8 +23,16 @@ g++ -std=c++17 -O2 -g ./src/main.cpp ./src/unit.cpp ./src/utils.cpp ./src/shoppi
 
 ## Usage
 
+Pass the path to the shopping list file as the first argument.
+
 ```bash
 ./bin/main ./shopping-list.txt
+```
+
+To display the weights in kilograms, add "kg" as the second argument.
+
+```bash
+./bin/main ./shopping-list.txt kg
 ```
 
 ## Example Output

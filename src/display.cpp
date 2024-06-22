@@ -144,7 +144,7 @@ inline static const std::string toStringStreamStr(T t) {
  * @param width The width of the column.
  * @param separator The separator to use as spaces.
  */
-void printPriceElemet(int64_t priceCents, const int& width, const char& separator = ' ') {
+void printPriceElement(int64_t priceCents, const int& width, const char& separator = ' ') {
     std::stringstream ss;
     
     ss.imbue(std::locale("en_US.UTF-8"));
@@ -232,7 +232,7 @@ void printShoppingListItem(ShoppingListItem shoppingListItem, Unit preferredUnit
         }
     }
     
-    printPriceElemet(itemTotalPriceCents, 8, separator);
+    printPriceElement(itemTotalPriceCents, 8, separator);
     printElement(ssPerUnitColumn.str(), 24, separator);
     
     std::cout << std::endl;
