@@ -8,10 +8,9 @@
                 "-std=c++17",
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "${workspaceFolder}/src/*.cpp",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
-                "-I/usr/local/boost_1_82_0/include"
+                "${workspaceFolder}/bin/${fileBasenameNoExtension}"
             ],
             "options": {
                 "cwd": "${fileDirname}"

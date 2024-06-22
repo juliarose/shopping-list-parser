@@ -18,7 +18,7 @@ mkdir -p bin
 ### Compile with g++
 
 ```bash
-g++ -std=c++17 -O2 -g ./src/main.cpp ./src/unit.cpp ./src/utils.cpp ./src/shopping_list.cpp ./src/display.cpp -o bin/main
+g++ -std=c++17 -O2 ./src/*.cpp -o bin/main
 ```
 
 ## Usage

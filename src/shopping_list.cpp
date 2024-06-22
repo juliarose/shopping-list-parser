@@ -495,6 +495,11 @@ ShoppingListItem parseShoppingListItemStr(const std::string &s) {
         }
     }
     
+    // This should allocate.
+    // 
+    // It's not necessary to put the string view into a string but it makes the shopping list 
+    // item more predictable, as the string view could be invalidated if the original string is
+    // modified or dropped from memory.
     std::string name = std::string(sView.data(), sView.length());
     
     return ShoppingListItem {

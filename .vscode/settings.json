@@ -1,6 +1,5 @@
 {
     "C_Cpp.default.includePath": [
-        "/usr/local/boost_1_82_0/include"
     ],
     "files.associations": {
         "any": "cpp",
